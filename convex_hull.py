@@ -87,6 +87,43 @@ def sort_clockwise(points: List[Point]):
     points.sort(key=sort_key)
 
 
+# Self implemented functions
+
+def split_in_two(points: List[Point]):
+    """
+    Split all points into two lists that represent the left and right sub-hull
+    
+    Because we want to split the hull into two via a middle point, we find the x values of all points, then sorts them into the two lists based off of their x value being < || > the middle most point
+    """
+    # Set the point lists
+    left_points = list()
+    right_points = list()
+    
+    # Set the x value list
+    x_values = []
+    
+    # Populate x value list with all x values
+    for [x, y] in points:
+        x_values.append(x)
+    
+    # Find the middle value
+    middle_x = sum(x_values) / len(points)
+    
+    # Filter points to halves based on their x value
+    for i in range(len(points)):
+        
+        # If the x value is less than or equal to the midpoint
+        if points[i][0] <= middle_x:
+            left_points.append(points[i])
+        else :
+            right_points.append(points[i])
+    
+    
+
+def combine(left_hull, right_hull):
+    # TODO: Implement the function
+    return hull
+
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ Base case of the recursive algorithm.
     """
@@ -99,6 +136,17 @@ def compute_hull(points: List[Point]) -> List[Point]:
     Given a list of points, computes the convex hull around those points
     and returns only the points that are on the hull.
     """
+    if len(points) <= 5:
+        return base_case_hull(points)
+    else:
+        left_points, right_points = split_in_two(points)
+        
+        compute_hull(left_points)
+        compute_hull(right_points)
+        
+        # return combination function here !
+        
+        
     # TODO: Implement a correct computation of the convex hull
     #  using the divide-and-conquer algorithm
     # TODO: Document your Initialization, Maintenance and Termination invariants.
