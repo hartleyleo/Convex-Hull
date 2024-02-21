@@ -87,51 +87,95 @@ def sort_clockwise(points: List[Point]):
     points.sort(key=sort_key)
 
 
+# Self implemented functions
+
+def split_in_two(points: List[Point]):
+    """
+    Split all points into two lists that represent the left and right sub-hull
+    
+    Because we want to split the hull into two via a middle point, we find the x values of all points, then sorts them into the two lists based off of their x value being < || > the middle most point
+    """
+    # Set the point lists
+    left_points = list()
+    right_points = list()
+    
+    # Set the x value list
+    x_values = []
+    
+    # Populate x value list with all x values
+    for [x, y] in points:
+        x_values.append(x)
+    
+    # Find the middle value
+    middle_x = sum(x_values) / len(points)
+    
+    # Filter points to halves based on their x value
+    for i in range(len(points)):
+        
+        # If the x value is less than or equal to the midpoint
+        if points[i][0] <= middle_x:
+            left_points.append(points[i])
+        else :
+            right_points.append(points[i])
+    
+    return left_points, right_points
+    
+    
+
+def combine(left_hull, right_hull):
+    # TODO: Implement the function
+    return hull
+
+#REFERENCE: https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Graham-Scan/
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ Base case of the recursive algorithm.
     """
     # TODO: You need to implement this function.
+
+    #Graham Scan Algo:
+
+    #1. Get a starting point: the lowest y coordinate
+    #       If there are two points with the same y value, 
+    #       then the point with smaller x coordinate value is considered
+    start_point = points[0]
+
+    for point in points[1:]:
+        if point[1] < start_point[1] or (point[1] == start_point[1] and point[0] < start_point[0]):
+            start_point = point
+
+    #2. Consider the remaining points and sort them by polar angle in counterclockwise order around points[0]. 
+        #    If the polar angle of two points is the same, then put the nearest point first
+    sorted_points = points[:]
+    sorted_points.remove(start_point)
+    sort_clockwise(sorted_points)
+    
+        #2.1 if more than two points are collinear with start_point, keep the farthest
+    to_remove = []
+    for point in sorted_points:
+        if collinear(start_point, point, point):
+            pass
+            #check the distances and append the closet:
+                #to_remove.append(point)
+
+    for point in to_remove:
+        sorted_points.remove(point)
+    
+
+
     return points
 
 
-
-#GENERAL NOTE 's:
-#   Check out section 11.5.3 in
-#   https://cs.au.dk/~gerth/papers/finger05.pdf
-#   Gives a solid foundation of what we are doing
-#
-#   Prerequisite Algos to get a better underestanding of Convex Hall:
-#   Graham Scan: https://en.wikipedia.org/wiki/Graham_scan#:~:text=Graham%27s%20scan%20is%20a%20method,hull%20ordered%20along%20its%20boundary.
-#       * It uses a stack to detect and remove concavities in the boundary
-#
-#   Andrews Algo: https://www.topcoder.com/thrive/articles/Line%20Sweep%20Algorithms 
-#       * Similar to Graham Scan
-#
-#   We must use the Quick-Hall Algorithm:
-#   https://www.youtube.com/watch?v=2EKIZrimeuk
-#
 def compute_hull(points: List[Point]) -> List[Point]:
     """
     Given a list of points, computes the convex hull around those points
     and returns only the points that are on the hull.
     """
-    # TODO: Implement a correct computation of the convex hull
-    #  using the divide-and-conquer algorithm
-    # TODO: Document your Initialization, Maintenance and Termination invariants.
-
-    #BASE CASE:
-    #   Once we cant do better moving the left point
-    #   and the right point, 
-    #   return the target to base_case_hall() function
-
-    #find the hall of the seperate list points 
-    #Do the two finger algorithm
-
-    #TO FIND THE UPPER TANGENT:
-    #   Walk clockwaise on the right hall
-    #   Walk counter-clockwise on the left hall
-
-    #TO FIND THE LOWER TANGENT:
-    #   Walk counter-clockwise on the right hall
-    #   Walk clockwise on the left hall
-    return points
+    if len(points) <= 5:
+        return base_case_hull(points)
+    else:
+        left_points, right_points = split_in_two(points)
+        
+        left_points = compute_hull(left_points)
+        right_points = compute_hull(right_points)
+        
+        return combine(left_points, right_points)
