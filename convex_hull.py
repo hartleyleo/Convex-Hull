@@ -162,7 +162,7 @@ def base_case_hull(points: List[Point]) -> List[Point]:
 
     #compute the hall with the remaining sorted points
     for point in sorted_points[1:]:
-        while(not is_clockwise(hull[-2], hull[-1], point)):
+        while len(hull) >= 2 and not is_clockwise(hull[-2], hull[-1], point):
             #if the angle turns clockwise, just remove from hall
             del hull[-1]
         hull.append(point)
