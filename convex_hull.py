@@ -119,14 +119,7 @@ def split_in_two(points: List[Point]):
             right_points.append(points[i])
     
     return left_points, right_points
-    
-    
-#Euclidean distance formula
-def distance(point1, point2):
-    x1, y1 = point1
-    x2, y2 = point2
-    val = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-    return val
+
 
 def combine(left_hull, right_hull):
     # TODO: Implement the function
