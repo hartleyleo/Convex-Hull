@@ -121,6 +121,12 @@ def split_in_two(points: List[Point]):
     return left_points, right_points
     
     
+#Euclidean distance formula
+def distance(point1, point2):
+    x1, y1 = point1
+    x2, y2 = point2
+    val = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    return val
 
 def combine(left_hull, right_hull):
     # TODO: Implement the function
@@ -151,18 +157,25 @@ def base_case_hull(points: List[Point]) -> List[Point]:
     
         #2.1 if more than two points are collinear with start_point, keep the farthest
     to_remove = []
-    for point in sorted_points:
-        if collinear(start_point, point, point):
-            pass
-            #check the distances and append the closet:
-                #to_remove.append(point)
+    for i in range(len(sorted_points) - 1):
+        if collinear(start_point, sorted_points[i], sorted_points[i + 1]):
+            to_remove.append(sorted_points[i])
 
     for point in to_remove:
         sorted_points.remove(point)
     
+    #add the two points, P0 and the closest point to P0 with the smallest polar angle
+    hull = [start_point, sorted_points[0]]
+
+    #compute the hall with the remaining sorted points
+    for point in sorted_points[1:]:
+        while(not is_clockwise(hull[-2], hull[-1], point)):
+            #if the angle turns clockwise, just remove from hall
+            del hull[-1]
+        hull.append(point)
 
 
-    return points
+    return hull
 
 
 def compute_hull(points: List[Point]) -> List[Point]:
