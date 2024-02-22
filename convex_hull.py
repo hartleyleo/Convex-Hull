@@ -275,7 +275,7 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
 
 def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     """
-    Function to combine two hulls together by using the two finger walking algorithm
+    Function to combine two hulls together and compute their convex hull using Andrew's monotone chain algorithm.
     """   
     # Clockwise sort both hulls to ensure points are walked correctly
     sort_clockwise(left_hull)
@@ -318,29 +318,20 @@ def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     
     # Sort the combined hull points in clockwise order
     combined_hull.sort()
-    
-    # Apply Graham's scan or Andrew's monotone chain algorithm to compute the convex hull
-    convex_hull = andrews_algorithm(combined_hull)
-    
-    return convex_hull
 
-def andrews_algorithm(points: List[Point]) -> List[Point]:
-    """
-    Computes the convex hull of a set of points using Andrew's monotone chain algorithm.
-    """
     # Sort the points lexicographically
-    points.sort()
+    combined_hull.sort()
 
     # Construct lower hull
     lower_hull = []
-    for p in points:
+    for p in combined_hull:
         while len(lower_hull) >= 2 and triangle_area(lower_hull[-2], lower_hull[-1], p) <= 0:
             lower_hull.pop()
         lower_hull.append(p)
 
     # Construct upper hull
     upper_hull = []
-    for p in reversed(points):
+    for p in reversed(combined_hull):
         while len(upper_hull) >= 2 and triangle_area(upper_hull[-2], upper_hull[-1], p) <= 0:
             upper_hull.pop()
         upper_hull.append(p)
