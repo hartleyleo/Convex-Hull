@@ -96,8 +96,8 @@ def split_in_two(points: List[Point]):
     Because we want to split the hull into two via a middle point, we find the x values of all points, then sorts them into the two lists based off of their x value being < || > the middle most point
     """
     # Set the point lists
-    left_points = list()
-    right_points = list()
+    left_points = []
+    right_points = []
     
     # Set the x value list
     x_values = []
@@ -159,164 +159,124 @@ def findHullsLeftMostPoint(hull: List[Point]) -> Point:
             
     return leftmost
 
-def next_index_clockwise(hull:List[Point], index:int) -> int:
-    """
-    Function to get the index of the next point in a list
-    """
-    return (index + 1) % len(hull)
-
-def previous_index_clockwise(hull:List[Point], index:int) -> int:
-    """
-    Function to get the index of the previous point in a list
-    """
-    return (index - 1) % len(hull)
-
 def find_top_connector_line_segment(left_hull: List[Point], right_hull: List[Point], left_hull_rightmost_point: Point, right_hull_leftmost_point: Point, midpoint_line: float) -> Tuple[Point, Point]:
     """
     Function to find the top most connecting line segment between two hulls
     """
-    # Indexes to use to traverse the hulls
-    current_left_index = left_hull.index(left_hull_rightmost_point)
-    current_right_index = right_hull.index(right_hull_leftmost_point)
+    # Hold placeholders for the best point in each hull for the best line segment verticies
+    best_case_right_hull_point = right_hull_leftmost_point
+    best_case_left_hull_point = left_hull_rightmost_point
     
-    best_left_hull_point = left_hull_rightmost_point
-    best_right_hull_point = right_hull_leftmost_point
+    # Used to hold the current best y-intercept, mainly used for a lightly more efficient
+    best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
     
-    # Loop through the points of both hulls using a while loop, looking for if the y-intercept of two points is greater than that of the two extrema points provided
-    while True:
+    # Variables to store repeated info
+    right_length = len(right_hull)
+    left_length = len(left_hull)
+    
+    # Loop through indecies to find the top most connecting line segment between the two hulls
+    # Check if the y-intercepts of the new hull point and the opposing hull's current best case point are less than the current best y-intercept, if so then do work
+    while (y_intercept(right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length], best_case_left_hull_point, midpoint_line) < best_case_y_intercept or y_intercept(left_hull[(left_hull.index(best_case_left_hull_point) - 1) % left_length], best_case_right_hull_point, midpoint_line) < best_case_y_intercept):
         
-        # Get the new indexes for the two finger algorithm
-        next_left_index = previous_index_clockwise(left_hull, current_right_index)
-        next_right_index = next_index_clockwise(right_hull, current_left_index)
-        
-        # Find current best y-intercept
-        current_best_y_intecerpt = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
-        
-        # Find the next two iterations of y-intercepts to check
-        next_left_y_intercept = y_intercept(left_hull[next_left_index], best_left_hull_point, midpoint_line)
-        next_right_y_intercept = y_intercept(best_right_hull_point, right_hull[next_right_index], midpoint_line)
-        
-        # Check if the left intercept is better than the current best intercept
-        if next_left_y_intercept > current_best_y_intecerpt:
-            current_right_index = next_left_index
-            best_right_hull_point = left_hull[current_right_index]
+        if (y_intercept(best_case_left_hull_point, right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length], midpoint_line) > best_case_y_intercept):
+            # Move to the previous point in the left hull if its y-intercept is lower, consider it the best case
+            best_case_left_hull_point = left_hull[(left_hull.index(best_case_left_hull_point) - 1) % left_length]
+            best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
             
-        # Check if the right intercept is better than the current best intercept
-        elif next_right_y_intercept > current_best_y_intecerpt:
-            current_left_index = next_right_index
-            best_left_hull_point = right_hull[current_left_index]
-            
-        # Best intercept has been found
         else:
-            break
+            # Move to the next point in the right hull if its y-intercept is lower, consider it the best case
+            best_case_right_hull_point = right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length]
+            best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
+            
 
-    return best_left_hull_point, best_right_hull_point
+    return best_case_left_hull_point, best_case_right_hull_point
+
 
 def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[Point], left_hull_rightmost_point: Point, right_hull_leftmost_point: Point, midpoint_line: float):
     """
     Function to find the bottom most connecting line segment between two hulls
     """
-    # Indexes to use to traverse the hulls
-    current_left_index = left_hull.index(right_hull_leftmost_point)
-    current_right_index = right_hull.index(left_hull_rightmost_point)
+    # Hold placeholders for the best point in each hull for the best line segment verticies
+    best_case_right_hull_point = right_hull_leftmost_point
+    best_case_left_hull_point = left_hull_rightmost_point
     
-    best_left_hull_point = left_hull_rightmost_point
-    best_right_hull_point = right_hull_leftmost_point
+    # Used to hold the current best y-intercept, mainly used for a lightly more efficient
+    best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
     
-    # Loop through the points of both hulls using a while loop, looking for if the y-intercept of two points is greater than that of the two extrema points provided
-    while True:
+    # Variables to store repeated info
+    right_length = len(right_hull)
+    left_length = len(left_hull)
+    
+    # Loop through indecies to find the bottom most connecting line segment between the two hulls
+    # Check if the y-intercepts of the new hull point and the opposing hull's current best case point are greater than the current best y-intercept, if so then do work
+    while (y_intercept(right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length], best_case_left_hull_point, midpoint_line) > best_case_y_intercept or y_intercept(left_hull[(left_hull.index(best_case_left_hull_point) - 1) % left_length], best_case_right_hull_point, midpoint_line) > best_case_y_intercept):
         
-        # Get the new indexes for the two finger algorithm
-        next_left_index = next_index_clockwise(left_hull, current_right_index)
-        next_right_index = previous_index_clockwise(right_hull, current_left_index)
-        
-        # Find current best y-intercept
-        current_best_y_intercept = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
-        
-        # Find the next two iterations of y-intercepts to check
-        next_left_y_intercept = y_intercept(left_hull[next_left_index], best_left_hull_point, midpoint_line)
-        next_right_y_intercept = y_intercept(best_right_hull_point, right_hull[next_right_index], midpoint_line)
-        
-        # Check if the left intercept is better than the current best intercept
-        if next_left_y_intercept < current_best_y_intercept:
-            current_right_index = next_left_index
-            best_right_hull_point = left_hull[current_right_index]
+        if (y_intercept(best_case_left_hull_point, right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length], midpoint_line) < best_case_y_intercept):
+            # Move to the previous point in the left hull if its y-intercept is higher, consider it the best case
+            best_case_left_hull_point = left_hull[(left_hull.index(best_case_left_hull_point) - 1) % left_length]
+            best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
             
-        # Check if the right intercept is better than the current best intercept
-        elif next_right_y_intercept < current_best_y_intercept:
-            current_left_index = next_right_index
-            best_left_hull_point = right_hull[current_left_index]
-            
-        # Best intercept has been found
         else:
-            break
-
-    return best_left_hull_point, best_right_hull_point
+            # Move to the previous point in the right hull if its y-intercept is higher, consider it the best case
+            best_case_right_hull_point = right_hull[(right_hull.index(best_case_right_hull_point) + 1) % right_length]
+            best_case_y_intercept = y_intercept(best_case_left_hull_point, best_case_right_hull_point, midpoint_line)
+            
+    
+    return best_case_left_hull_point, best_case_right_hull_point
 
 def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     """
     Function to combine two hulls together by using the two finger walking algorithm
-    """
-    # Create the new hull
-    combined_halves_hull = []
-    
+    """   
     # Find right most point of left hull
     left_hull_rightmost_point = findHullsRightMostPoint(left_hull)
     
     # Find left most point of right hull
     right_hull_leftmost_point = findHullsLeftMostPoint(right_hull)
     
-    # Get the line to find highest and lowest y-interept with
+    # Get the line to find highest and lowest y-intercept with
     midpoint_line = (left_hull_rightmost_point[0] + right_hull_leftmost_point[0]) / 2
     
     # Clockwise sort both hulls to ensure points are walked correctly
     sort_clockwise(left_hull)
     sort_clockwise(right_hull)
     
-    # Get the top left and right points that's line segments create the highest y-intercept
+    # Find top and bottom connector line segments
     top_left_point, top_right_point = find_top_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
-    
-    # Get the bottom left and right points that's line segments create the highest y-intercept
     bottom_left_point, bottom_right_point = find_bottom_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
     
     # Merge the hulls via
     
-    # 1. adding the lower left point to the hull
-    combined_halves_hull.append(bottom_left_point)
+    # Create empty hull list
+    combined_hull = []
     
-    # 2. Adding all points afterwords until it hits the top left point
+    # 1. Adding the lower left point to the hull, then adding all points afterwords until it hits the top left point
+    index = left_hull.index(bottom_left_point)
+    while left_hull[index] is not top_left_point:
+        combined_hull.append(left_hull[index])
+        index = (index + 1) % len(left_hull)
     
-    # Get the current bottom left index from the actual left hull
-    left_hull_bottom_left_index = left_hull.index(bottom_left_point)
-    left_hull_length = len(left_hull)
-    while left_hull[left_hull_bottom_left_index] is not top_left_point:
-        # Append everything to the new hull list and then iterate the index
-        combined_halves_hull.append(left_hull[left_hull_bottom_left_index])
-        left_hull_bottom_left_index = (left_hull_bottom_left_index + 1) % left_hull_length
+    # 2. Append the top left and then top right point in order
+    combined_hull.append(top_left_point)
+    combined_hull.append(top_right_point)
     
-    # 3. Append the top left and then top right point in order
-    combined_halves_hull.append(top_left_point)
-    combined_halves_hull.append(top_right_point)
+    # 3. Loop again adding all points in the right hull from the top right point to the bottom right point
+    index = right_hull.index(top_right_point)
+    while right_hull[index] is not bottom_right_point:
+        combined_hull.append(right_hull[index])
+        index = (index + 1) % len(right_hull)
     
-    # 4. Loop again adding all points in the right hull from the top right point to the bottom right point
-    right_hull_top_right_index = right_hull.index(top_right_point)
-    right_hull_length = len(right_hull)
-    while right_hull[right_hull_top_right_index] is not bottom_right_point:
-        # Append everything to the new hull list and then iterate the index
-        combined_halves_hull.append(right_hull[right_hull_top_right_index])
-        right_hull_top_right_index = (right_hull_top_right_index + 1) % right_hull_length
+    # 4. Add the bottom right point and the bottom left point to the hull
+    combined_hull.append(bottom_right_point)
+    combined_hull.append(bottom_left_point)
     
-    # 5. add the bottom right point and the bottom left point to the hull
-    combined_halves_hull.append(bottom_right_point)
-    
-    return combined_halves_hull
+    return combined_hull 
 
 # REFERENCE: https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Graham-Scan/
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ 
     Base case of the recursive algorithm.
     """
-    
     # BASE base case, any combination of <= 3 points will just be the actual hull
     if len(points) <= 3:
         return points
@@ -324,7 +284,7 @@ def base_case_hull(points: List[Point]) -> List[Point]:
         # Naive algorithm 
 
         # Graham Scan Algo:
-
+        
         # 1. Get a starting point: the lowest y coordinate
         #  If there are two points with the same y value, 
         #  then the point with smaller x coordinate value is considered
@@ -352,13 +312,14 @@ def base_case_hull(points: List[Point]) -> List[Point]:
         # Add the two points, P0 and the closest point to P0 with the smallest polar angle
         hull = [start_point, sorted_points[0]]
 
-        # Compute the hall with the remaining sorted points
+        # Compute the hull with the remaining sorted points
         for point in sorted_points[1:]:
             while len(hull) >= 2 and not is_clockwise(hull[-2], hull[-1], point):
-                # If the angle turns clockwise, just remove from hall
+                # If the angle turns clockwise, just remove from hull
                 del hull[-1]
             hull.append(point)
 
+        sort_clockwise(hull)
         return hull
 
 
@@ -376,8 +337,8 @@ def compute_hull(points: List[Point]) -> List[Point]:
         left_points, right_points = split_in_two(points)
         
         # Compute the hull of the left and right half's points
-        left_points = compute_hull(left_points)
-        right_points = compute_hull(right_points)
+        left_hull = compute_hull(left_points)
+        right_hull = compute_hull(right_points)
         
         # Combine the two hulls
-        return combine(left_points, right_points)
+        return combine(left_hull, right_hull)

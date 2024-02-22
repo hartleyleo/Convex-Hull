@@ -17,17 +17,31 @@ def add_point(event):
     points.append((event.x, event.y))
     return
 
+def draw_hull_step_by_step(hull, index=0):
+    if index < len(hull) - 1:
+        x1 = hull[index][0]
+        y1 = hull[index][1]
+        x2 = hull[index + 1][0]
+        y2 = hull[index + 1][1]
+        w.create_line(x1, y1, x2, y2, width=3)
+        # Schedule the next line to be drawn after one second
+        master.after(1000, draw_hull_step_by_step, hull, index + 1)
 
 def draw_hull():
     hull = copy.copy(compute_hull(points))
-    hull.append(hull[0])
-    for i in range(0, len(hull) - 1):
-        x1 = hull[i][0]
-        y1 = hull[i][1]
-        x2 = hull[i + 1][0]
-        y2 = hull[i + 1][1]
-        w.create_line(x1, y1, x2, y2, width=3)
-    return
+    hull.append(hull[0])  # Close the hull
+    draw_hull_step_by_step(hull)
+
+# def draw_hull():
+#     hull = copy.copy(compute_hull(points))
+#     hull.append(hull[0])
+#     for i in range(0, len(hull) - 1):
+#         x1 = hull[i][0]
+#         y1 = hull[i][1]
+#         x2 = hull[i + 1][0]
+#         y2 = hull[i + 1][1]
+#         w.create_line(x1, y1, x2, y2, width=3)
+#     return
 
 
 if __name__ == '__main__':
