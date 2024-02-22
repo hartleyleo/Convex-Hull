@@ -224,54 +224,129 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
     
     return best_case_left_hull_point, best_case_right_hull_point
 
+# def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
+#     """
+#     Function to combine two hulls together by using the two finger walking algorithm
+#     """   
+#         # Clockwise sort both hulls to ensure points are walked correctly
+#     sort_clockwise(left_hull)
+#     sort_clockwise(right_hull)
+#     # Find right most point of left hull
+#     left_hull_rightmost_point = findHullsRightMostPoint(left_hull)
+    
+#     # Find left most point of right hull
+#     right_hull_leftmost_point = findHullsLeftMostPoint(right_hull)
+    
+#     # Get the line to find highest and lowest y-intercept with
+#     midpoint_line = (left_hull_rightmost_point[0] + right_hull_leftmost_point[0]) / 2
+    
+
+    
+#     # Find top and bottom connector line segments
+#     top_left_point, top_right_point = find_top_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
+#     bottom_left_point, bottom_right_point = find_bottom_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
+    
+#     # Merge the hulls via
+    
+#     # Create empty hull list
+#     combined_hull = []
+    
+#     # 1. Adding the lower left point to the hull, then adding all points afterwords until it hits the top left point
+#     index = left_hull.index(bottom_left_point)
+#     while left_hull[index] is not top_left_point:
+#         combined_hull.append(left_hull[index])
+#         index = (index + 1) % len(left_hull)
+    
+#     # 2. Append the top left and then top right point in order
+#     combined_hull.append(top_left_point)
+#     combined_hull.append(top_right_point)
+    
+#     # 3. Loop again adding all points in the right hull from the top right point to the bottom right point
+#     index = right_hull.index(top_right_point)
+#     while right_hull[index] is not bottom_right_point:
+#         combined_hull.append(right_hull[index])
+#         index = (index + 1) % len(right_hull)
+    
+#     # 4. Add the bottom right point and the bottom left point to the hull
+#     combined_hull.append(bottom_right_point)
+#     combined_hull.append(bottom_left_point)
+    
+#     return combined_hull 
+
 def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     """
     Function to combine two hulls together by using the two finger walking algorithm
     """   
-    # Find right most point of left hull
+    # Clockwise sort both hulls to ensure points are walked correctly
+    sort_clockwise(left_hull)
+    sort_clockwise(right_hull)
+
+    # Find rightmost point of left hull
     left_hull_rightmost_point = findHullsRightMostPoint(left_hull)
     
-    # Find left most point of right hull
+    # Find leftmost point of right hull
     right_hull_leftmost_point = findHullsLeftMostPoint(right_hull)
     
     # Get the line to find highest and lowest y-intercept with
     midpoint_line = (left_hull_rightmost_point[0] + right_hull_leftmost_point[0]) / 2
     
-    # Clockwise sort both hulls to ensure points are walked correctly
-    sort_clockwise(left_hull)
-    sort_clockwise(right_hull)
-    
     # Find top and bottom connector line segments
     top_left_point, top_right_point = find_top_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
     bottom_left_point, bottom_right_point = find_bottom_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
     
-    # Merge the hulls via
-    
     # Create empty hull list
     combined_hull = []
     
-    # 1. Adding the lower left point to the hull, then adding all points afterwords until it hits the top left point
-    index = left_hull.index(bottom_left_point)
-    while left_hull[index] is not top_left_point:
-        combined_hull.append(left_hull[index])
-        index = (index + 1) % len(left_hull)
+    # Add points from the left hull to the combined hull until the bottom left point is reached
+    index_left = left_hull.index(bottom_left_point)
+    while True:
+        combined_hull.append(left_hull[index_left])
+        if left_hull[index_left] == top_left_point:
+            break
+        index_left = (index_left + 1) % len(left_hull)
     
-    # 2. Append the top left and then top right point in order
-    combined_hull.append(top_left_point)
-    combined_hull.append(top_right_point)
+    # Add points from the right hull to the combined hull until the bottom right point is reached
+    index_right = right_hull.index(bottom_right_point)
+    while True:
+        combined_hull.append(right_hull[index_right])
+        if right_hull[index_right] == top_right_point:
+            break
+        index_right = (index_right - 1) % len(right_hull)
     
-    # 3. Loop again adding all points in the right hull from the top right point to the bottom right point
-    index = right_hull.index(top_right_point)
-    while right_hull[index] is not bottom_right_point:
-        combined_hull.append(right_hull[index])
-        index = (index + 1) % len(right_hull)
+    # Remove duplicate points from the combined hull
+    combined_hull = list(set(combined_hull))
     
-    # 4. Add the bottom right point and the bottom left point to the hull
-    combined_hull.append(bottom_right_point)
-    combined_hull.append(bottom_left_point)
+    # Sort the combined hull points in clockwise order
+    combined_hull.sort()
     
-    return combined_hull 
+    # Apply Graham's scan or Andrew's monotone chain algorithm to compute the convex hull
+    convex_hull = andrews_algorithm(combined_hull)
+    
+    return convex_hull
 
+def andrews_algorithm(points: List[Point]) -> List[Point]:
+    """
+    Computes the convex hull of a set of points using Andrew's monotone chain algorithm.
+    """
+    # Sort the points lexicographically
+    points.sort()
+
+    # Construct lower hull
+    lower_hull = []
+    for p in points:
+        while len(lower_hull) >= 2 and triangle_area(lower_hull[-2], lower_hull[-1], p) <= 0:
+            lower_hull.pop()
+        lower_hull.append(p)
+
+    # Construct upper hull
+    upper_hull = []
+    for p in reversed(points):
+        while len(upper_hull) >= 2 and triangle_area(upper_hull[-2], upper_hull[-1], p) <= 0:
+            upper_hull.pop()
+        upper_hull.append(p)
+
+    # Concatenate the lower and upper hulls to form the convex hull
+    return lower_hull[:-1] + upper_hull[:-1]
 
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ 
@@ -327,14 +402,13 @@ def compute_hull(points: List[Point]) -> List[Point]:
     # Checks the length to see if it can just be brute forced or not
     if len(points) <= 5:
         return base_case_hull(points)
-    else:
         
-        # Split the points into two halves
-        left_points, right_points = split_in_two(points)
-        
-        # Compute the hull of the left and right half's points
-        left_hull = compute_hull(left_points)
-        right_hull = compute_hull(right_points)
-        
-        # Combine the two hulls
-        return combine(left_hull, right_hull)
+    # Split the points into two halves
+    left_points, right_points = split_in_two(points)
+
+    # Compute the hull of the left and right half's points
+    left_hull = compute_hull(left_points)
+    right_hull = compute_hull(right_points)
+    
+    # Combine the two hulls
+    return combine(left_hull, right_hull)
