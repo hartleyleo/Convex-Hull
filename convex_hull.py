@@ -171,11 +171,6 @@ def previous_index_clockwise(hull:List[Point], index:int) -> int:
     """
     return (index - 1) % len(hull)
 
-def is_better_y_intercept(intercept_one: float, intercept_two: float) -> bool:
-    """
-    Function to return if the intercept 
-    """
-
 def find_top_connector_line_segment(left_hull: List[Point], right_hull: List[Point], left_hull_rightmost_point: Point, right_hull_leftmost_point: Point, midpoint_line: float) -> Tuple[Point, Point]:
     """
     Function to find the top most connecting line segment between two hulls
