@@ -272,55 +272,51 @@ def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     
     return combined_hull 
 
-# REFERENCE: https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Graham-Scan/
+
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ 
     Base case of the recursive algorithm.
     """
-    # BASE base case, any combination of <= 3 points will just be the actual hull
+    #<= 3 points will just be the actual hull
     if len(points) <= 3:
         return points
     else:
-        # Naive algorithm 
+        #Naive algorithm 
 
-        # Graham Scan Algo:
-        
-        # 1. Get a starting point: the lowest y coordinate
-        #  If there are two points with the same y value, 
-        #  then the point with smaller x coordinate value is considered
-        start_point = points[0]
-
-        for point in points[1:]:
-            if point[1] < start_point[1] or (point[1] == start_point[1] and point[0] < start_point[0]):
-                start_point = point
-
-        # 2. Consider the remaining points and sort them by polar angle in counterclockwise order around points[0]. 
-        #  If the polar angle of two points is the same, then put the nearest point first
+        #Sort the points by their polar angle counterclockwise
+        points.sort()
         sorted_points = points[:]
-        sorted_points.remove(start_point)
-        sort_clockwise(sorted_points)
-        
-        # 2.1 if more than two points are collinear with start_point, keep the farthest
-        to_remove = []
-        for i in range(len(sorted_points) - 1):
-            if collinear(start_point, sorted_points[i], sorted_points[i + 1]):
-                to_remove.append(sorted_points[i])
 
-        for point in to_remove:
-            sorted_points.remove(point)
-        
-        # Add the two points, P0 and the closest point to P0 with the smallest polar angle
-        hull = [start_point, sorted_points[0]]
+        #Find the hull with the remaining sorted points
+        hull = []
+        curr_point = 0
 
-        # Compute the hull with the remaining sorted points
-        for point in sorted_points[1:]:
-            while len(hull) >= 2 and not is_clockwise(hull[-2], hull[-1], point):
-                # If the angle turns clockwise, just remove from hull
-                del hull[-1]
-            hull.append(point)
+        while curr_point != 0 or len(hull) == 0:
 
-        sort_clockwise(hull)
-        return hull
+            #Add current point to the hull
+            hull.append(sorted_points[curr_point])
+
+            # Get the next point without going out of bounds
+            next_point_index = (curr_point + 1) % len(sorted_points)
+
+            #Point with the minimum angle from the current point
+            min_angle_point = next_point_index
+            for potential_point in range(len(sorted_points)):
+                if is_counter_clockwise(sorted_points[curr_point], sorted_points[potential_point], sorted_points[next_point_index]):
+                    #Next point becomes the previous potential point
+                    next_point_index = potential_point
+                    #New minimum angle point becomes the potential point index
+                    min_angle_point = potential_point
+
+            #A full cycle was completed
+            if min_angle_point == curr_point:
+                break
+
+            # The current point becomes the next point with the minimum angle
+            curr_point = next_point_index
+
+    return hull
+
 
 
 def compute_hull(points: List[Point]) -> List[Point]:
