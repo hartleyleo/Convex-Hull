@@ -14,12 +14,7 @@ def y_intercept(p1: Point, p2: Point, x: int) -> float:
     with the vertical line passing through x.
     """
     x1, y1 = p1
-    x2, y2 = p2
-    
-    if x1 is x2:
-        slope = (y2 - y1) / ((x2+0.5) - x1)
-        return y1 + (x - x1) * slope
-    
+    x2, y2 = p2    
     slope = (y2 - y1) / (x2 - x1)
     return y1 + (x - x1) * slope
 
@@ -195,19 +190,19 @@ def find_top_connector_line_segment(left_hull: List[Point], right_hull: List[Poi
         next_right_index = next_index_clockwise(right_hull, current_left_index)
         
         # Find current best y-intercept
-        current_best_y_intecept = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
+        current_best_y_intecerpt = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
         
         # Find the next two iterations of y-intercepts to check
         next_left_y_intercept = y_intercept(left_hull[next_left_index], best_left_hull_point, midpoint_line)
         next_right_y_intercept = y_intercept(best_right_hull_point, right_hull[next_right_index], midpoint_line)
         
         # Check if the left intercept is better than the current best intercept
-        if next_left_y_intercept > current_best_y_intecept:
+        if next_left_y_intercept > current_best_y_intecerpt:
             current_right_index = next_left_index
             best_right_hull_point = left_hull[current_right_index]
             
         # Check if the right intercept is better than the current best intercept
-        elif next_right_y_intercept > current_best_y_intecept:
+        elif next_right_y_intercept > current_best_y_intecerpt:
             current_left_index = next_right_index
             best_left_hull_point = right_hull[current_left_index]
             
@@ -222,8 +217,8 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
     Function to find the bottom most connecting line segment between two hulls
     """
     # Indexes to use to traverse the hulls
-    current_left_index = left_hull.index(left_hull_rightmost_point)
-    current_right_index = right_hull.index(right_hull_leftmost_point)
+    current_left_index = left_hull.index(right_hull_leftmost_point)
+    current_right_index = right_hull.index(left_hull_rightmost_point)
     
     best_left_hull_point = left_hull_rightmost_point
     best_right_hull_point = right_hull_leftmost_point
@@ -257,7 +252,6 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
             break
 
     return best_left_hull_point, best_right_hull_point
-
 
 def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     """
