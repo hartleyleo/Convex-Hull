@@ -15,6 +15,11 @@ def y_intercept(p1: Point, p2: Point, x: int) -> float:
     """
     x1, y1 = p1
     x2, y2 = p2
+    
+    if x1 is x2:
+        slope = (y2 - y1) / ((x2+0.5) - x1)
+        return y1 + (x - x1) * slope
+    
     slope = (y2 - y1) / (x2 - x1)
     return y1 + (x - x1) * slope
 
@@ -210,9 +215,9 @@ def find_top_connector_line_segment(left_hull: List[Point], right_hull: List[Poi
         else:
             break
 
-    return Tuple[best_left_hull_point, best_right_hull_point]
+    return best_left_hull_point, best_right_hull_point
 
-def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[Point], left_hull_rightmost_point: Point, right_hull_leftmost_point: Point, midpoint_line: float) -> Tuple[Point, Point]:
+def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[Point], left_hull_rightmost_point: Point, right_hull_leftmost_point: Point, midpoint_line: float):
     """
     Function to find the bottom most connecting line segment between two hulls
     """
@@ -231,19 +236,19 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
         next_right_index = previous_index_clockwise(right_hull, current_left_index)
         
         # Find current best y-intercept
-        current_best_y_intecept = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
+        current_best_y_intercept = y_intercept(best_right_hull_point, best_left_hull_point, midpoint_line)
         
         # Find the next two iterations of y-intercepts to check
         next_left_y_intercept = y_intercept(left_hull[next_left_index], best_left_hull_point, midpoint_line)
         next_right_y_intercept = y_intercept(best_right_hull_point, right_hull[next_right_index], midpoint_line)
         
         # Check if the left intercept is better than the current best intercept
-        if next_left_y_intercept < current_best_y_intecept:
+        if next_left_y_intercept < current_best_y_intercept:
             current_right_index = next_left_index
             best_right_hull_point = left_hull[current_right_index]
             
         # Check if the right intercept is better than the current best intercept
-        elif next_right_y_intercept < current_best_y_intecept:
+        elif next_right_y_intercept < current_best_y_intercept:
             current_left_index = next_right_index
             best_left_hull_point = right_hull[current_left_index]
             
@@ -251,7 +256,8 @@ def find_bottom_connector_line_segment(left_hull: List[Point], right_hull: List[
         else:
             break
 
-    return Tuple[best_left_hull_point, best_right_hull_point]
+    return best_left_hull_point, best_right_hull_point
+
 
 def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     """
@@ -274,10 +280,10 @@ def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     sort_clockwise(right_hull)
     
     # Get the top left and right points that's line segments create the highest y-intercept
-    [top_left_point, top_right_point] = find_top_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
+    top_left_point, top_right_point = find_top_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
     
     # Get the bottom left and right points that's line segments create the highest y-intercept
-    [bottom_left_point, bottom_right_point] = find_bottom_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
+    bottom_left_point, bottom_right_point = find_bottom_connector_line_segment(left_hull, right_hull, left_hull_rightmost_point, right_hull_leftmost_point, midpoint_line)
     
     # Merge the hulls via
     
@@ -311,7 +317,7 @@ def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     
     return combined_halves_hull
 
-#REFERENCE: https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Graham-Scan/
+# REFERENCE: https://algorithmtutor.com/Computational-Geometry/Convex-Hull-Algorithms-Graham-Scan/
 def base_case_hull(points: List[Point]) -> List[Point]:
     """ 
     Base case of the recursive algorithm.
@@ -323,7 +329,7 @@ def base_case_hull(points: List[Point]) -> List[Point]:
     else:
         # Naive algorithm 
 
-        #   Graham Scan Algo:
+        # Graham Scan Algo:
 
         # 1. Get a starting point: the lowest y coordinate
         #  If there are two points with the same y value, 

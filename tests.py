@@ -6,7 +6,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from convex_hull import Point
-from convex_hull import clockwise_sort
+from convex_hull import sort_clockwise
 from convex_hull import compute_hull
 from convex_hull import is_clockwise
 from convex_hull import is_counter_clockwise
@@ -43,13 +43,13 @@ class TestGivenFunctions(unittest.TestCase):
         self.assertFalse(is_counter_clockwise(p1, p2, p3))
         return
 
-    def test_clockwise_sort(self):
+    def test_sort_clockwise(self):
         p1 = (0, 0)
         p2 = (1, 0)
         p3 = (1, 1)
         p4 = (0, 1)
         points = [p2, p4, p1, p3]
-        clockwise_sort(points)
+        sort_clockwise(points)
 
         test_points = points + points[:2]
         for i in range(len(points)):
@@ -88,7 +88,7 @@ class TestComputeHull(unittest.TestCase):
     ))
     def test_compute_hull(self, points):
         points = list(points)
-        clockwise_sort(points)
+        sort_clockwise(points)
 
         hull = compute_hull(points)
         self.assertTrue(is_convex_hull(hull, points))
