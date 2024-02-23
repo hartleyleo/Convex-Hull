@@ -1,5 +1,7 @@
 import math
+import random
 import sys
+import time
 from typing import List
 from typing import Tuple
 
@@ -304,59 +306,6 @@ def combine(left_hull: List[Point], right_hull: List[Point]) -> List[Point]:
     return lower_hull[:-1] + upper_hull[:-1]
 
 
-
-"""
----------------------------------------------
-            GRAHAM SCAN FUNCTIONS                     
----------------------------------------------
-"""
-
-def orientation(p: Point, q: Point, r: Point) -> int:
-    """
-    Function to find orientation of ordered triplet (p, q, r).
-    Returns:
-        0 if p, q, r are colinear
-        1 if clockwise
-        2 if counterclockwise
-    """
-    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
-    if val == 0:
-        return 0  # colinear
-    return 1 if val > 0 else 2  # clockwise or counterclockwise
-
-
-def graham_scan(points: List[Point]) -> List[Point]:
-    """
-    Computes the convex hull of a set of points using Graham's scan algorithm.
-    """
-    point_len = len(points)
-
-    # Find the point with the lowest y-coordinate
-    min_idx = 0
-    for i in range(1, point_len):
-        if points[i][1] < points[min_idx][1] or (points[i][1] == points[min_idx][1] and points[i][0] < points[min_idx][0]):
-            min_idx = i
-
-    # Place the lowest point at the beginning of the list
-    points[0], points[min_idx] = points[min_idx], points[0]
-
-    # Sort points based on polar angle with respect to the lowest point
-    pivot = points[0]
-    points[1:] = sorted(points[1:], key=lambda x: (180 + (180 / 3.1415926535) * math.atan2(x[1] - pivot[1], x[0] - pivot[0])) % 360)
-
-    # Initialize stack for maintaining convex hull
-    stack = [points[0], points[1], points[2]]
-
-    # Process remaining points
-    for i in range(3, point_len):
-        while orientation(stack[-2], stack[-1], points[i]) != 2:
-            stack.pop()
-        stack.append(points[i])
-
-    return stack
-
-
-
 """
 ---------------------------------------------------
             COMPUTE HULL BASE FUNCTIONS                     
@@ -367,13 +316,45 @@ def base_case_hull(points: List[Point]) -> List[Point]:
     """ 
     Base case of the recursive algorithm.
     """
-    # <= 3 points will just be the actual hull
+    #<= 3 points will just be the actual hull
     if len(points) <= 3:
         return points
     else:
-        # Since there are enough points to quickly compute the hull, we run the naive algorithm
-        #Naive algorithm here is Graham Scan
-        return graham_scan(points)
+        #Naive algorithm 
+
+        #Sort the points by their polar angle counterclockwise
+        points.sort()
+        sorted_points = points[:]
+
+        #Find the hull with the remaining sorted points
+        hull = []
+        curr_point = 0
+
+        while curr_point != 0 or len(hull) == 0:
+
+            #Add current point to the hull
+            hull.append(sorted_points[curr_point])
+
+            # Get the next point without going out of bounds
+            next_point_index = (curr_point + 1) % len(sorted_points)
+
+            #Point with the minimum angle from the current point
+            min_angle_point = next_point_index
+            for potential_point in range(len(sorted_points)):
+                if is_counter_clockwise(sorted_points[curr_point], sorted_points[potential_point], sorted_points[next_point_index]):
+                    #Next point becomes the previous potential point
+                    next_point_index = potential_point
+                    #New minimum angle point becomes the potential point index
+                    min_angle_point = potential_point
+
+            #A full cycle was completed
+            if min_angle_point == curr_point:
+                break
+
+            # The current point becomes the next point with the minimum angle
+            curr_point = next_point_index
+
+    return hull
 
 
 def compute_hull(points: List[Point]) -> List[Point]:
