@@ -3,6 +3,8 @@ Authored by [Leon Hartley](https://github.com/hartleyleo) & [Brennan Rivera](htt
 
 This code was created as part of an assignment for [URI CSC 440](https://www.coursicle.com/uri/courses/CSC/440/) where we found the [Convex Hull](https://mathworld.wolfram.com/ConvexHull.html) of a set of points in a 2D grid. 
 
+NOTE: The draw_hull.py file was supplied, and in the convex_hull.py file the functions, y_intercept, triangle_area, is_clockwise, is_counter_clockwise, collinear, and sort_clockwise were also all supplied by our professor, [Noah Daniels](https://web.uri.edu/cs/meet/noah-daniels/).
+
 ## ❓ Problem
 We would like to find the Convex Hull of a set of given points on a 2D grid. The convex hull is the outtermost set of points that contain all other points inside of it. When a line segment has all other points on the side facing the origin, then this line segment is on the hull.
 
